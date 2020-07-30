@@ -98,3 +98,50 @@ predictions = scaler.inverse_transform(predictions)#Undo scaling
 #Calculating RMSE
 rmse=np.sqrt(np.mean(((predictions- y_test)**2)))
 rmse
+
+#Plotting the Data
+train = data[:training_data_len]
+valid = data[training_data_len:]
+valid['Predictions'] = predictions
+
+#Visualizing the data
+plt.figure(figsize=(16,8))
+plt.title('Model')
+plt.xlabel('Date', fontsize=18)
+plt.ylabel('Close Price USD ($)', fontsize=18)
+plt.plot(train['Close'])
+plt.plot(valid[['Close', 'Predictions']])
+plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
+plt.show()
+
+#Showing the valid & predicted prices
+valid
+
+#Get the quote
+tesla_quote = web.DataReader('TSLA', data_source='yahoo', start='2012-01-01', end='2019-12-17')
+
+#Create a new dataframe
+new_df = tesla_quote.filter(['Close'])
+
+#Getting the closing price values for last 60 days 
+last_60_days = new_df[-60:].values
+
+#Scaling
+last_60_days_scaled = scaler.transform(last_60_days)
+
+X_test = []
+
+X_test.append(last_60_days_scaled)
+
+X_test = np.array(X_test)
+
+X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+
+pred_price = model.predict(X_test)
+
+pred_price = scaler.inverse_transform(pred_price)
+print(pred_price)
+
+#Checking the actual price
+tesla_quote2 = web.DataReader('TSLA', data_source='yahoo', start='2019-12-18', end='2019-12-18')
+print(tesla_quote2['Close'])
